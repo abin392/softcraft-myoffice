@@ -1,0 +1,133 @@
+/* --- SIGN UP PAGE STYLES --- */
+.sign-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 5%;
+    position: relative;
+    z-index: 10;
+}
+
+.sign-card {
+    background-color: var(--bg-card);
+    padding: 3rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    width: 100%;
+    /* Made slightly wider than the login page (500px instead of 420px) 
+       to accommodate the two-column password row neatly */
+    max-width: 500px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.sign-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    color: var(--text-main);
+}
+
+.sign-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.sign-header h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.sign-header p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.terms-check {
+    margin-bottom: 2rem;
+    font-size: 0.85rem;
+}
+
+.accent-link {
+    color: var(--accent-cyan);
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.accent-link:hover {
+    color: var(--text-main);
+}
+
+.sign-btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    font-size: 1rem;
+}
+
+.sign-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.sign-footer a {
+    color: var(--accent-cyan);
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.sign-footer a:hover {
+    color: var(--text-main);
+}
+
+/* Custom Password Alert Message */
+.alert-message {
+    background-color: rgba(239, 68, 68, 0.1);
+    /* Faded red background */
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    /* Premium red text */
+    padding: 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: -0.5rem;
+    margin-bottom: 1.5rem;
+    display: none;
+    /* Hidden by default via JS */
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+    .sign-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .sign-header h2 {
+        font-size: 1.5rem;
+    }
+
+    /* Stacks the passwords on top of each other on tiny screens */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}

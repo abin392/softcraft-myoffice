@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="img/office logo.jpeg">
+    <title>Create Account | Stackcraft Technologies</title>
+
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="sign.css">
+    <link rel="stylesheet" href="fontawesome-free-7.0.0-web/css/all.min.css">
+    <link rel="stylesheet" href="fontawesome-free-7.0.0-web/css/fontawesome.min.css">
+</head>
+
+<body>
+
+    <div class="sign-wrapper">
+        <div class="sign-card reveal-up">
+
+            <div class="sign-logo">
+                <img src="img/office logo.jpeg" alt="Stackcraft Logo" class="nav-brand-img">
+                StackCraft
+            </div>
+
+            <div class="sign-header">
+                <h2>Join the Elite</h2>
+                <p>Create your account to access our technical infrastructure.</p>
+            </div>
+
+            <form id="signup-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="fullName" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="emailAdd" placeholder="engineer@stackcraft.tech" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="pass1" placeholder="••••••••" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" id="pass2" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div id="password-alert" class="alert-message">
+                    <i class="fa-solid fa-circle-exclamation"></i> Passwords do not match.
+                </div>
+
+                <div class="terms-check">
+                    <label class="remember-me">
+                        <input type="checkbox" required>
+                        <span>I agree to the <a href="#" class="accent-link">Terms of Service</a> & <a href="#"
+                                class="accent-link">Privacy Policy</a></span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary sign-btn">Create Account <i
+                        class="fa-solid fa-user-plus"></i></button>
+            </form>
+
+            <div class="sign-footer">
+                <p>Already have an account? <a href="login.html">Sign In</a></p>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="privacy-modal" class="lightbox-modal">
+        <div class="privacy-card">
+            <h2>Privacy Policy & Cookies</h2>
+            <div class="privacy-content">
+                <h3>1. Client-Side Data Storage</h3>
+                <p>At Stackcraft Technologies, your privacy and security are elite priorities. When you create an
+                    account, your authentication credentials (Name, Email, and Password) are encrypted and stored
+                    locally on your personal device (via localStorage). We do not transmit or expose your primary
+                    authentication data to external tracking databases.</p>
+                <h3>2. Conversational Voice AI</h3>
+                <p>For applications utilizing our Voice Assistant feature, audio inputs are processed securely in
+                    real-time to execute your commands. We do not permanently record, store, or sell your voice queries
+                    to third-party advertising networks.</p>
+                <h3>3. Session Expiration</h3>
+                <p>To protect your digital footprint, our authentication architecture employs a strict 3-day inactivity
+                    timer. If you do not access the platform within 72 hours, your session data is automatically wiped
+                    from your local device.</p>
+                <h3>4. Cookies & Telemetry</h3>
+                <p>We utilize strictly necessary technical telemetry to maintain high-performance architectures, dynamic
+                    layouts, and dark-mode preferences. We do not participate in cross-site tracking or pixel
+                    harvesting.</p>
+            </div>
+            <div class="privacy-footer">
+                <label class="remember-me privacy-check">
+                    <input type="checkbox" id="privacy-checkbox">
+                    <span>I have read and accept all privacy policies and necessary cookies.</span>
+                </label>
+                <button type="button" class="btn btn-primary" id="privacy-got-it" disabled>Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="terms-modal" class="lightbox-modal">
+        <div class="privacy-card">
+            <h2>Terms of Service</h2>
+            <div class="privacy-content">
+                <h3>1. Enterprise Agreements</h3>
+                <p>By accessing the Stackcraft Technologies portal, you agree to abide by our elite technical standards.
+                    Our infrastructure is provided "as is" for high-performance web and e-commerce deployment.</p>
+                <h3>2. Acceptable Use</h3>
+                <p>You agree not to utilize our API ecosystems or digital platforms for unauthorized scraping, reverse
+                    engineering, or high-frequency malicious pinging. We strictly monitor rate limits and network
+                    integrity.</p>
+                <h3>3. Intellectual Property</h3>
+                <p>All source code, UI/UX designs (including Kinetic UI), and backend architectures (such as Forge API)
+                    displayed in our portfolio remain the exclusive intellectual property of Stackcraft Technologies.
+                </p>
+                <h3>4. Service Level & Liability</h3>
+                <p>While we architect systems for 99.99% uptime, Stackcraft Technologies shall not be held liable for
+                    incidental data loss or third-party server downtimes out of our direct control.</p>
+            </div>
+            <div class="privacy-footer">
+                <label class="remember-me privacy-check">
+                    <input type="checkbox" id="terms-checkbox">
+                    <span>I have read and accept the Terms of Service.</span>
+                </label>
+                <button type="button" class="btn btn-primary" id="terms-got-it" disabled>Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="toast.js"></script>
+    <script src="index.js"></script>
+    <script src="sign.js"></script>
+</body>
+
+</html>
