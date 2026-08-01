@@ -180,10 +180,12 @@
     <!-- 2. Your Existing Data & Logic -->
     <script>
         // --- DYNAMIC MESSAGE GENERATOR (BUG FIX APPLIED) ---
+        // --- DYNAMIC MESSAGE GENERATOR (WITH EXTENDED SECTORS) ---
         function getDynamicMessage(fileName) {
-            // FIX: Safely convert to string to prevent null errors that break the table
+            // Safely convert to string to prevent null errors that break the table
             const safeName = String(fileName || "").toLowerCase();
             
+            // Default fallback
             let industryEn = "bakery and cake shop";
             let industryTa = "பேக்கரி மற்றும் கேக் கடைகளுக்காக";
             
@@ -197,6 +199,20 @@
             } else if (safeName.includes("cake") || safeName.includes("bakery")) {
                 industryEn = "bakery and cake shop";
                 industryTa = "பேக்கரி மற்றும் கேக் கடைகளுக்காக";
+            } 
+            // --- NEW SECTORS ADDED BELOW ---
+            else if (safeName.includes("photo") || safeName.includes("studio")) {
+                industryEn = "photo studio and photography";
+                industryTa = "புகைப்பட ஸ்டுடியோக்களுக்காக";
+            } else if (safeName.includes("ecommerce") || safeName.includes("e-commerce")) {
+                industryEn = "e-commerce and online store";
+                industryTa = "இ-காமர்ஸ் மற்றும் ஆன்லைன் கடைகளுக்காக";
+            } else if (safeName.includes("education") || safeName.includes("institution") || safeName.includes("school") || safeName.includes("college")) {
+                industryEn = "educational institution";
+                industryTa = "கல்வி மற்றும் பயிற்சி நிறுவனங்களுக்காக";
+            } else if (safeName.includes("e-attanous")) {
+                industryEn = "e-attanous and digital";
+                industryTa = "இ-அட்டானஸ் (e-attanous) நிறுவனங்களுக்காக";
             }
 
             const customRawMessage = `Hello! I noticed your ${industryEn} business. We specialize in building professional, high-quality websites for ${industryEn}s to help grow your online presence. Let me know if you are interested in getting a website for your shop!
@@ -305,9 +321,30 @@ Visit my website: https://stackcraft-technologies-7f3eb.web.app/`;
             // Note: The rest of your embedded JSON array is preserved perfectly here. Truncated for display, but paste your full array in your actual file.
         ];
 
+        // --- DYNAMIC PAGE TITLE GENERATOR ---
+        function updatePageTitle(fileName) {
+            const h1 = document.querySelector('h1');
+            if (!fileName) {
+                h1.textContent = "Bakery Client Leads";
+                return;
+            }
+            
+            // Remove the .json extension and replace dashes/underscores with spaces
+            let cleanName = fileName.replace('.json', '').replace(/[-_]/g, ' ');
+            
+            // Capitalize the first letter of each word (e.g., "cake shop" -> "Cake Shop")
+            cleanName = cleanName.replace(/\b\w/g, char => char.toUpperCase());
+            
+            // Update the H1 text dynamically
+            h1.textContent = cleanName + " Client Leads";
+        }
+
         // --- PERSISTENT LOCAL STORAGE LOAD ---
         const storedLeads = localStorage.getItem("savedClientLeads");
         const savedFileName = localStorage.getItem("lastUploadedFileName") || "";
+        
+        // NEW: Update the heading instantly on page load based on permanently saved file name
+        updatePageTitle(savedFileName);
         
         if (storedLeads) {
             try {
@@ -315,9 +352,11 @@ Visit my website: https://stackcraft-technologies-7f3eb.web.app/`;
             } catch(e) {
                 console.error("Local storage parsing error, falling back to default.", e);
                 renderTable(embeddedData, "cake-shop");
+                updatePageTitle("cake-shop"); // Fallback title
             }
         } else {
             renderTable(embeddedData, "cake-shop");
+            updatePageTitle("cake-shop"); // Fallback title
         }
 
         // Allow user to upload any new JSON list and dynamically change context
@@ -336,8 +375,8 @@ Visit my website: https://stackcraft-technologies-7f3eb.web.app/`;
                     localStorage.setItem("savedClientLeads", JSON.stringify(parsedData));
                     localStorage.setItem("lastUploadedFileName", fileName);
                     
-                    // Optional: Reset sent status map when a brand new file/niche is uploaded
-                    // localStorage.removeItem("sentStatusMap"); 
+                    // NEW: Instantly update the heading on new file upload
+                    updatePageTitle(fileName);
 
                     // Render table with the new file's dynamic context
                     renderTable(parsedData, fileName); 
