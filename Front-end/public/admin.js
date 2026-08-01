@@ -2,7 +2,7 @@
 // Ensure the path to firebase-config.js is correct based on your folder structure
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { collection, query, orderBy, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // DOM Elements
 const adminLoader = document.getElementById("admin-loader");
@@ -111,20 +111,24 @@ function fetchRealTimeInquiries() {
             }
 
             const card = document.createElement("div");
-            card.className = "card inquiry-card reveal-up active";
+            // ADDED: client-card class for filtering, and data-timestamp for accurate date sorting
+            card.className = "card inquiry-card client-card reveal-up active";
+            card.setAttribute("data-timestamp", data.timestamp); 
             
-            // Injecting the new Badge and Notes
+            // Injecting the new Badge, Delete Button, Notes, and PDF Classes
             card.innerHTML = `
                 ${contactedBadge}
                 <div class="timestamp-badge">${dateStr} - ${timeStr}</div>
+                
                 <h3 style="margin-top: 10px; margin-bottom: 1.5rem; color: var(--accent-cyan); font-size: 1.2rem; padding-left: ${data.whatsappContacted ? '35px' : '0'};">
-                    <i class="fa-solid fa-building" style="margin-right: 8px;"></i> ${data.company || "Independent Client"}
+                    <i class="fa-solid fa-building" style="margin-right: 8px;"></i> <span class="pdf-company">${data.company || "Independent Client"}</span>
+                    <button class="delete-btn" data-id="${docId}"><i class="fa-solid fa-trash"></i> Delete</button>
                 </h3>
                 
-                <div class="data-row"><i class="fa-solid fa-user"></i> <strong>Name:</strong> ${data.name}</div>
-                <div class="data-row"><i class="fa-solid fa-envelope"></i> <strong>Email:</strong> <a href="mailto:${data.email}" style="color:var(--text-main);">${data.email}</a></div>
+                <div class="data-row"><i class="fa-solid fa-user"></i> <strong>Name:</strong> <span class="pdf-name">${data.name}</span></div>
+                <div class="data-row"><i class="fa-solid fa-envelope"></i> <strong>Email:</strong> <a href="mailto:${data.email}" class="pdf-email" style="color:var(--text-main);">${data.email}</a></div>
                 <div class="data-row" style="display: flex; align-items: center; margin-top: 5px;">
-                    <i class="fa-solid fa-phone" style="margin-top: -3px;"></i> <strong style="margin-right: 10px;">Mobile:</strong> ${phoneActions}
+                    <i class="fa-solid fa-phone" style="margin-top: -3px;"></i> <strong style="margin-right: 10px;">Mobile:</strong> <span class="pdf-phone">${phoneActions}</span>
                 </div>
                 
                 <div class="message-box">
@@ -193,4 +197,103 @@ document.getElementById("inquiries-grid").addEventListener("click", async (e) =>
         // listener at the top of the file will instantly detect the database update 
         // and re-render the specific card automatically!
     }
+
+    // 4. Delete Button Clicked -> Erase from Database
+    const deleteBtn = e.target.closest('.delete-btn');
+    if (deleteBtn) {
+        if (confirm("Are you sure you want to completely erase this client's data? This action cannot be undone.")) {
+            const docId = deleteBtn.getAttribute('data-id');
+            deleteDoc(doc(db, "inquiries", docId)).catch((error) => {
+                console.error("Error deleting document: ", error);
+                alert("Failed to delete client data.");
+            });
+        }
+    }
+});
+
+// --- NEW: Global Search & Date Filtering Logic ---
+function filterClientData() {
+    const searchTerm = document.getElementById('adminSearch').value.toLowerCase();
+    const timeFilter = document.getElementById('timeFilter').value;
+    
+    const cards = document.querySelectorAll('.client-card'); 
+    const now = new Date();
+
+    cards.forEach(card => {
+        // Search text match
+        const textContent = card.textContent.toLowerCase();
+        const matchesSearch = textContent.includes(searchTerm);
+        
+        // Time filter match using the accurate timestamp data attribute
+        let matchesTime = true;
+        const timestamp = parseInt(card.getAttribute('data-timestamp'));
+        
+        if (timeFilter !== 'all' && !isNaN(timestamp)) {
+            const cardDate = new Date(timestamp);
+            if (timeFilter === 'week') {
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(now.getDate() - 7);
+                matchesTime = cardDate >= oneWeekAgo;
+            } else if (timeFilter === 'month') {
+                matchesTime = cardDate.getMonth() === now.getMonth() && cardDate.getFullYear() === now.getFullYear();
+            } else if (timeFilter === 'year') {
+                matchesTime = cardDate.getFullYear() === now.getFullYear();
+            }
+        }
+        
+        // Toggle visibility
+        card.style.display = (matchesSearch && matchesTime) ? '' : 'none';
+    });
+}
+
+// Attach filter listeners
+document.getElementById('adminSearch').addEventListener('input', filterClientData);
+document.getElementById('timeFilter').addEventListener('change', filterClientData);
+
+// --- NEW: Export to Professional PDF Logic ---
+document.getElementById('exportPdfBtn').addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const docPdf = new jsPDF();
+    
+    // Professional Header
+    docPdf.setFontSize(18);
+    docPdf.setTextColor(44, 62, 80);
+    docPdf.text('StackCraft Client Inquiries Report', 14, 20);
+    
+    docPdf.setFontSize(10);
+    docPdf.setTextColor(100);
+    docPdf.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+    
+    const tableData = [];
+    const visibleCards = document.querySelectorAll('.client-card');
+    
+    // Scrape data only from currently visible/filtered cards
+    visibleCards.forEach(card => {
+        if (card.style.display !== 'none') {
+            const name = card.querySelector('.pdf-name')?.textContent.trim() || '-';
+            const company = card.querySelector('.pdf-company')?.textContent.trim() || '-';
+            const email = card.querySelector('.pdf-email')?.textContent.trim() || '-';
+            // Extract just the raw phone number string, ignoring the action buttons
+            let phone = card.querySelector('.pdf-phone')?.textContent.trim() || '-';
+            phone = phone.replace(/[^0-9+]/g, '').substring(0, 13); // Clean up button text bleed
+            
+            tableData.push([name, company, email, phone]);
+        }
+    });
+    
+    if (tableData.length === 0) {
+        alert("No data available to export based on current filters.");
+        return;
+    }
+
+    docPdf.autoTable({
+        startY: 35,
+        head: [['Client Name', 'Shop/Company', 'Email', 'Phone']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { fillColor: [44, 62, 80] }, 
+        styles: { fontSize: 9, cellPadding: 4 }
+    });
+    
+    docPdf.save('StackCraft_Client_Report.pdf');
 });

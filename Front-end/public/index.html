@@ -786,6 +786,24 @@
         </div>
     </div>
 
+    <!-- --- NEW: Professional SVG Success Animation Modal --- -->
+    <div id="svg-success-modal" class="svg-success-overlay">
+        <div class="svg-success-card">
+            <div class="svg-animation-wrapper">
+                <!-- Self-drawing SVG Checkmark -->
+                <svg class="svg-check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="svg-check-circle" cx="26" cy="26" r="25" fill="none" />
+                    <path class="svg-check-path" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                </svg>
+            </div>
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">Inquiry Sent</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+                Our engineering team has received your project details. We will initiate contact shortly.
+            </p>
+            <button type="button" class="btn btn-primary" id="close-success-btn" style="width: 100%;">Acknowledge</button>
+        </div>
+    </div>
+
     <!-- Native UI Animation & Preloader Script (Failsafe) -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -820,6 +838,26 @@
             reveals.forEach(reveal => {
                 observer.observe(reveal);
             });
+        });
+    </script>
+
+    <script>
+        // --- NEW: Global Success UI Trigger ---
+        window.showSuccessSVG = function() {
+            const modal = document.getElementById('svg-success-modal');
+            if(modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        };
+
+        // Close button logic for the success modal
+        document.getElementById('close-success-btn')?.addEventListener('click', function() {
+            document.getElementById('svg-success-modal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+            
+            // Optional: Automatically clear the form inputs after success
+            document.querySelectorAll('.contact-form-card input, .contact-form-card textarea').forEach(field => field.value = '');
         });
     </script>
 

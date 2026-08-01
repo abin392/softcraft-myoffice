@@ -118,6 +118,11 @@ if (contactBtn) {
             // --- NEW: RECORD TIMESTAMP ON SUCCESSFUL SUBMISSION ---
             localStorage.setItem("lastInquiryTime", new Date().getTime().toString());
 
+            // ---> NEW: TRIGGER PROFESSIONAL SVG SUCCESS ANIMATION <---
+            if (typeof window.showSuccessSVG === 'function') {
+                window.showSuccessSVG();
+            }
+
             if (typeof showToast === 'function') showToast("Inquiry successfully sent! Our team will contact you.", "success");
             else alert("Inquiry successfully sent!");
 
