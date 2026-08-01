@@ -1,23 +1,33 @@
-// Import the stable v10.8.1 Firebase SDKs
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { auth, db } from "./firebase-config.js";
+import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// Your exact Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyCzL2cDG4xf3rK3r6RwdT1Z5LJun7537ik",
-    authDomain: "stackcraft-technologies-7f3eb.firebaseapp.com",
-    projectId: "stackcraft-technologies-7f3eb",
-    storageBucket: "stackcraft-technologies-7f3eb.firebasestorage.app",
-    messagingSenderId: "1028413439593",
-    appId: "1:1028413439593:web:425b467c7539114e76ecf8",
-    measurementId: "G-DQH58HGD10"
-};
+// --- DYNAMIC MOBILE NUMBER VALIDATION ---
+window.addEventListener("DOMContentLoaded", function () {
+    const phoneInput = document.getElementById("contactPhone");
+    const phoneCheckIcon = document.getElementById("phone-check-icon");
 
-// Initialize Firebase ONLY ONCE
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app);
+    if (phoneInput && phoneCheckIcon) {
+        phoneInput.addEventListener("input", function () {
+            // 1. Instantly strip out any letters, spaces, or symbols
+            let digitsOnly = this.value.replace(/\D/g, '');
+            
+            // 2. Force it to never exceed 10 digits
+            if (digitsOnly.length > 10) {
+                digitsOnly = digitsOnly.substring(0, 10);
+            }
+            
+            // 3. Update the input field with the cleaned numbers
+            this.value = digitsOnly;
+            
+            // 4. Show the green checkmark ONLY when exactly 10 digits are present
+            if (digitsOnly.length === 10) {
+                phoneCheckIcon.style.opacity = "1";
+            } else {
+                phoneCheckIcon.style.opacity = "0";
+            }
+        });
+    }
+});
 
 // --- 1. AUTO-REFILL SAVED FORM DATA ---
 window.addEventListener("DOMContentLoaded", function () {
@@ -26,6 +36,7 @@ window.addEventListener("DOMContentLoaded", function () {
         document.getElementById("contactName").value = pendingName;
         document.getElementById("contactEmail").value = localStorage.getItem("pendingContactEmail") || "";
         document.getElementById("contactCompany").value = localStorage.getItem("pendingContactCompany") || "";
+        document.getElementById("contactPhone").value = localStorage.getItem("pendingContactPhone") || "";
         document.getElementById("contactMessage").value = localStorage.getItem("pendingContactMessage") || "";
     }
 });
@@ -37,43 +48,52 @@ if (contactBtn) {
     contactBtn.addEventListener("click", async function (event) {
         event.preventDefault();
 
-        // Grab values from the HTML inputs
         const name = document.getElementById("contactName").value.trim();
         const email = document.getElementById("contactEmail").value.trim();
         const company = document.getElementById("contactCompany").value.trim();
+        const phone = document.getElementById("contactPhone").value.trim();
         const message = document.getElementById("contactMessage").value.trim();
 
-        // Basic Validation
-        if (!name || !email || !message) {
-            if (typeof showToast === 'function') showToast("Please fill in your Name, Email, and Project Details.", "error");
-            else alert("Please fill in your Name, Email, and Project Details.");
+        // --- NEW: MANDATORY PHONE NUMBER CHECK ---
+        if (!name || !email || !message || phone.length !== 10) {
+            if (typeof showToast === 'function') showToast("Please fill in your Name, Email, Project Details, and a valid 10-digit Mobile No.", "error");
+            else alert("Please fill in your Name, Email, Project Details, and a valid 10-digit Mobile No.");
             return;
         }
 
-        // AUTHENTICATION CHECK
-        const currentUserEmail = localStorage.getItem("userEmail");
-        const lastLogin = localStorage.getItem("lastLoginTimestamp");
-        const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
-        let isAuthenticated = false;
+        // --- NEW: CLIENT-SIDE RATE LIMITING (10 SECOND COOLDOWN) ---
+        const lastSubmitTime = localStorage.getItem("lastInquiryTime");
+        const currentTime = new Date().getTime();
+        const cooldownMs = 10 * 1000; // 10 seconds in milliseconds
 
-        if (currentUserEmail && lastLogin) {
-            const timeSinceLastLogin = Date.now() - parseInt(lastLogin);
-            if (timeSinceLastLogin <= THREE_DAYS_MS) {
-                isAuthenticated = true;
+        if (lastSubmitTime && (currentTime - parseInt(lastSubmitTime)) < cooldownMs) {
+            // Calculate remaining seconds instead of minutes
+            const secondsLeft = Math.ceil((cooldownMs - (currentTime - parseInt(lastSubmitTime))) / 1000);
+            
+            if (typeof showToast === 'function') {
+                showToast(`Rate limit active. Please wait ${secondsLeft} second(s) before sending another inquiry.`, "error");
+            } else {
+                alert(`Rate limit active. Please wait ${secondsLeft} second(s) before sending another inquiry.`);
             }
+            return;
         }
+
+        // FIREBASE AUTHENTICATION CHECK
+        const isAuthenticated = auth.currentUser !== null;
 
         // If NOT logged in -> Save data & Redirect
         if (!isAuthenticated) {
+            // ... (Keep your existing pending data save and redirect logic here) ...
             localStorage.setItem("pendingContactName", name);
             localStorage.setItem("pendingContactEmail", email);
             localStorage.setItem("pendingContactCompany", company);
+            localStorage.setItem("pendingContactPhone", phone);
             localStorage.setItem("pendingContactMessage", message);
 
             if (typeof showToast === 'function') showToast("Authentication required. Please sign in to submit your inquiry.", "error");
             else alert("Authentication required. Please create an account or sign in.");
 
-            setTimeout(() => { window.location.href = "sign.html"; }, 2000);
+            setTimeout(() => { window.location.href = "login.html"; }, 2000);
             return;
         }
 
@@ -83,32 +103,36 @@ if (contactBtn) {
         contactBtn.disabled = true;
 
         try {
-            // 10-Second Timeout Safeguard
             const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error("TIMEOUT")), 10000)
             );
 
             const saveTask = addDoc(collection(db, "inquiries"), {
-                name: name, email: email, company: company, message: message,
-                timestamp: new Date().toISOString()
+                name: name, email: email, company: company, phone: phone, message: message,
+                timestamp: new Date().toISOString(),
+                userId: auth.currentUser.uid 
             });
 
             await Promise.race([saveTask, timeoutPromise]);
 
-            // Success
+            // --- NEW: RECORD TIMESTAMP ON SUCCESSFUL SUBMISSION ---
+            localStorage.setItem("lastInquiryTime", new Date().getTime().toString());
+
             if (typeof showToast === 'function') showToast("Inquiry successfully sent! Our team will contact you.", "success");
             else alert("Inquiry successfully sent!");
 
-            // Clear the form fields completely
+            // Clear fields
             document.getElementById("contactName").value = "";
             document.getElementById("contactEmail").value = "";
             document.getElementById("contactCompany").value = "";
+            document.getElementById("contactPhone").value = "";
             document.getElementById("contactMessage").value = "";
 
             // Wipe temporary data
             localStorage.removeItem("pendingContactName");
             localStorage.removeItem("pendingContactEmail");
             localStorage.removeItem("pendingContactCompany");
+            localStorage.removeItem("pendingContactPhone");
             localStorage.removeItem("pendingContactMessage");
 
         } catch (error) {
@@ -141,16 +165,10 @@ window.addEventListener("DOMContentLoaded", function () {
         formInputs.forEach((input, index) => {
             input.addEventListener("keydown", function (event) {
                 if (event.key === "Enter") {
-                    // SAFEGUARD: Allow Shift+Enter for new lines in the textarea
                     if (index === formInputs.length - 1 && event.shiftKey) return;
-
                     event.preventDefault();
-
-                    if (index < formInputs.length - 1) {
-                        formInputs[index + 1].focus(); // Jump to next box
-                    } else {
-                        submitBtn.click(); // Click submit
-                    }
+                    if (index < formInputs.length - 1) formInputs[index + 1].focus();
+                    else submitBtn.click();
                 }
             });
         });

@@ -1,57 +1,90 @@
+import { auth } from "./firebase-config.js";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
 document.addEventListener("DOMContentLoaded", function () {
 
-    // --- 1. PREMIUM REVEAL ANIMATION ---
-    const reveals = document.querySelectorAll(".reveal-up");
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add("active");
+    // --- 1. SHOW/HIDE PASSWORD LOGIC ---
+    const togglePasswords = document.querySelectorAll('.toggle-password');
+    togglePasswords.forEach(icon => {
+        icon.addEventListener('click', function () {
+            const input = this.previousElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+                this.classList.remove('fa-eye');
+                this.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                this.classList.remove('fa-eye-slash');
+                this.classList.add('fa-eye');
+            }
         });
     });
-    reveals.forEach(reveal => observer.observe(reveal));
 
-    // --- 2. LOGIN VERIFICATION LOGIC ---
-    const form = document.querySelector("form");
-    const emailInput = document.querySelector("input[type='email']");
-    const passInput = document.querySelector("input[type='password']");
+    // --- 2. FIREBASE EMAIL LOGIN VERIFICATION ---
+    const form = document.getElementById("login-form");
+    const emailInput = document.getElementById("loginEmail");
+    const passInput = document.getElementById("loginPass");
+    const loginBtn = document.querySelector(".login-btn");
 
-    form.addEventListener("submit", function (event) {
-        event.preventDefault(); // Prevent page reload
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
 
-        // Grab the stored details
-        const storedEmail = localStorage.getItem("userEmail");
-        const storedPass = localStorage.getItem("userPass");
-        const userName = localStorage.getItem("userName");
+        const originalText = loginBtn.innerHTML;
+        loginBtn.innerHTML = `Logging in... <i class="fa-solid fa-spinner fa-spin"></i>`;
+        loginBtn.disabled = true;
 
-        // Verify credentials
-        if (emailInput.value === storedEmail && passInput.value === storedPass) {
+        try {
+            const userCredential = await signInWithEmailAndPassword(auth, emailInput.value, passInput.value);
+            const userName = userCredential.user.displayName || "Engineer";
 
-            // Success! Reset the 3-day timer
-            localStorage.setItem("lastLoginTimestamp", Date.now().toString());
+            if (typeof showToast === 'function') showToast(`Authentication successful. Welcome back, ${userName}.`, "success");
+            else alert(`Authentication successful. Welcome back, ${userName}.`);
 
-            // Show Custom Toast Notification (Fallback to alert if toast.js isn't linked)
-            if (typeof showToast === 'function') {
-                showToast(`Authentication successful. Welcome back, ${userName}.`, "success");
-            } else {
-                alert(`Authentication successful. Welcome back, ${userName}.`);
-            }
-
-            // Wait 2 seconds, then Smart Redirect
             setTimeout(() => {
-                // If they have a pending form, jump directly to the contact section!
-                if (localStorage.getItem("pendingContactName")) {
-                    window.location.href = "index.html#contact";
-                } else {
-                    window.location.href = "index.html";
-                }
+                if (localStorage.getItem("pendingContactName")) window.location.href = "index.html#contact";
+                else window.location.href = "index.html";
             }, 2000);
 
-        } else {
-            // Failure
-            if (typeof showToast === 'function') {
-                showToast("Authentication failed. Invalid Email or Password.", "error");
-            } else {
-                alert("Authentication failed. Invalid Email or Password.");
-            }
+        } catch (error) {
+            console.error("Login Error:", error);
+            if (typeof showToast === 'function') showToast("Authentication failed. Invalid Email or Password.", "error");
+            else alert("Authentication failed. Invalid Email or Password.");
+            
+            loginBtn.innerHTML = originalText;
+            loginBtn.disabled = false;
         }
     });
+
+    // --- 3. GOOGLE AUTHENTICATION ---
+    const googleBtn = document.getElementById("googleLoginBtn");
+    if (googleBtn) {
+        googleBtn.addEventListener("click", async function () {
+            const provider = new GoogleAuthProvider();
+            const originalContent = googleBtn.innerHTML;
+            
+            googleBtn.innerHTML = `Connecting... <i class="fa-solid fa-spinner fa-spin"></i>`;
+            googleBtn.disabled = true;
+
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const userName = result.user.displayName || "Engineer";
+
+                if (typeof showToast === 'function') showToast(`Authentication successful. Welcome, ${userName}.`, "success");
+                else alert(`Authentication successful. Welcome, ${userName}.`);
+
+                setTimeout(() => {
+                    if (localStorage.getItem("pendingContactName")) window.location.href = "index.html#contact";
+                    else window.location.href = "index.html";
+                }, 2000);
+
+            } catch (error) {
+                console.error("Google Login Error:", error);
+                if (typeof showToast === 'function') showToast("Google Sign-In failed or was cancelled.", "error");
+                else alert("Google Sign-In failed.");
+
+                googleBtn.innerHTML = originalContent;
+                googleBtn.disabled = false;
+            }
+        });
+    }
 });

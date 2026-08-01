@@ -5,7 +5,7 @@
     <meta name="google-site-verification" content="1dvamYiw4ORqep9vHxBh-czgoC1WMgrYk7ElMsHsGho">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/jpeg" href="img/office logo.jpeg">
+    <link rel="icon" type="image/jpeg" href="img/sc.png">
     <title>Stackcraft Technologies | Web & E-Commerce Solutions</title>
 
     <!-- --- NEW: FREE GOOGLE SEO TAGS --- -->
@@ -99,7 +99,7 @@
 
     <nav class="navbar">
         <div class="logo">
-            <img src="img/office logo.jpeg" alt="Stackcraft Logo" class="nav-brand-img">
+            <img src="img/sc.png" alt="Stackcraft Logo" class="nav-brand-img">
             StackCraft_Technology
         </div>
         <ul class="nav-links">
@@ -112,12 +112,48 @@
                 </a>
             </li>
         </ul>
-        <a href="login.html" class="btn btn-primary">Get Started</a>
+        <!-- UPGRADED NAV AUTH BUTTON & DROPDOWN -->
+        <div class="nav-auth-wrapper">
+            <a href="login.html" class="btn btn-primary" id="nav-action-btn">Get Started</a>
+
+            <div class="user-dropdown" id="user-profile-dropdown">
+                <div class="dropdown-profile">
+                    <div class="profile-avatar" id="profile-avatar"><i class="fa-solid fa-user"></i></div>
+                    <div class="profile-details">
+                        <h4 id="profile-name">User Name</h4>
+                        <p id="profile-email">user@email.com</p>
+                    </div>
+                </div>
+                <button id="dropdown-logout-btn" class="dropdown-logout">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </div>
     </nav>
 
     <header class="hero reveal-up">
         <div class="badge"><i class="fa-solid fa-gem"></i> DIGITAL EXCELLENCE</div>
-        <h1>STACKCRAFT_TECHNOLOGY<br><span>Web Applications & E-commerce</span></h1>
+
+        <!-- UPGRADED ANIMATED HEADING -->
+        <h1>
+            <span class="svg-title-wrapper">
+                STACKCRAFT-TECH
+                <!-- Professional SVG Drawing Accent -->
+                <svg class="title-swoosh" viewBox="0 0 500 40" preserveAspectRatio="none">
+                    <path d="M10,20 Q250,38 490,20" fill="none" stroke="url(#swoosh-grad)" stroke-width="8"
+                        stroke-linecap="round" />
+                    <defs>
+                        <linearGradient id="swoosh-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="var(--accent-cyan)" />
+                            <stop offset="100%" stop-color="var(--accent-blue)" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </span>
+            <br>
+            <span class="animated-gradient-text">Web Applications & E-commerce Development Service</span>
+        </h1>
+
         <p>Professional digital solutions oriented toward high-performance results. We engineer elite technical
             ecosystems for modern enterprises.</p>
         <div class="hero-buttons">
@@ -406,6 +442,148 @@
         </div>
     </section>
 
+    <section class="feature-showcase" id="cakeshop" style="border-top: none; padding-top: 0;">
+        <div class="showcase-header reveal-up">
+            <span class="section-badge">COMPLETED PRODUCT</span>
+            <h2>3. Artisanal Cake Shop Platform</h2>
+            <p>A full-stack e-commerce bakery experience. Featuring dynamic menus, advanced search algorithms, seamless checkout flows, and an integrated voice assistant helper.</p>
+        </div>
+
+        <div class="showcase-container">
+            
+            <!-- 1. Welcome Load -->
+            <div class="showcase-row reveal-up">
+                <div class="showcase-content">
+                    <h3><i class="fa-solid fa-spinner cyan-icon"></i> Immersive Preloader</h3>
+                    <p>An elegant, branded welcome loading screen that ensures required assets and dynamic data are fetched in the background before revealing the UI, preventing layout shifts.</p>
+                </div>
+                <div class="showcase-image">
+                    <img src="img/welcom load.png" alt="Welcome Loading Screen" class="glass-img">
+                </div>
+            </div>
+
+            <!-- 2. Welcome Page -->
+            <div class="showcase-row reverse reveal-up">
+                <div class="showcase-content">
+                    <h3><i class="fa-solid fa-door-open cyan-icon"></i> Premium Landing Experience</h3>
+                    <p>A clean, high-conversion hero section emphasizing artisanal quality. Designed with sophisticated typography and minimalist spacing to immediately capture user attention.</p>
+                </div>
+                <div class="showcase-image">
+                    <img src="img/welcom.png" alt="Welcome Landing Page" class="glass-img">
+                </div>
+            </div>
+
+            <!-- 3. Skeleton Loader -->
+            <div class="showcase-row reveal-up">
+                <div class="showcase-content">
+                    <h3><i class="fa-solid fa-layer-group cyan-icon"></i> Skeleton Loading UI</h3>
+                    <p>Advanced skeleton screens replace traditional spinners during data fetching. This architectural choice enhances perceived performance and provides visual stability.</p>
+                </div>
+                <div class="showcase-image">
+                    <img src="img/hero scroller skeleton.png" alt="Skeleton Loader Interface" class="glass-img">
+                </div>
+            </div>
+
+            <!-- 4. Menu -->
+            <div class="showcase-row reverse reveal-up">
+                <div class="showcase-content">
+                    <h3><i class="fa-solid fa-cake-candles cyan-icon"></i> Categorized Dynamic Menu</h3>
+                    <p>A beautifully categorized visual menu allowing users to seamlessly browse pastries, beverages, and snacks with high-resolution imagery and clear subtext.</p>
+                </div>
+                <div class="showcase-image">
+                    <img src="img/menu.png" alt="Dynamic Category Menu" class="glass-img">
+                </div>
+            </div>
+
+            <!-- 5. Search Product UI and Algorithm -->
+            <div class="showcase-row reveal-up">
+                <div class="showcase-content">
+                    <h3><i class="fa-solid fa-magnifying-glass cyan-icon"></i> Intelligent Search Architecture</h3>
+                    <p>A real-time search UI powered by a smart filtering algorithm. It instantly matches keystrokes to products, displaying thumbnails, categories, and pricing directly in the dropdown.</p>
+                </div>
+                <div class="showcase-image">
+                    <img src="img/search Ui.png" alt="Live Search Algorithm UI" class="glass-img">
+                </div>
+            </div>
+
+            <!-- 6. Offer Product Scroller -->
+            <div class="showcase-row reverse reveal-up">
+                <div class="showcase-content">
+                    <h3><i class="fa-solid fa-tags cyan-icon"></i> Promotional Hero Scroller</h3>
+                    <p>An interactive, highly optimized image carousel designed to highlight new arrivals and special discount offers without impacting the page's core web vitals.</p>
+                </div>
+                <div class="showcase-image">
+                    <img src="img/offer and new product hero scroller.png" alt="Offers and Promotions Scroller" class="glass-img">
+                </div>
+            </div>
+
+            <!-- 7. Product Detail View -->
+            <div class="showcase-row reveal-up">
+                <div class="showcase-content">
+                    <h3><i class="fa-solid fa-circle-info cyan-icon"></i> High-Fidelity Product Details</h3>
+                    <p>Comprehensive detail views showcasing ingredients, ratings, and dynamic pricing. Users can seamlessly adjust quantities before adding items to their bag.</p>
+                </div>
+                <div class="showcase-image">
+                    <img src="img/product detail view page.png" alt="Product Detail View" class="glass-img">
+                </div>
+            </div>
+
+            <!-- 8. Your Bag Page -->
+            <div class="showcase-row reverse reveal-up">
+                <div class="showcase-content">
+                    <h3><i class="fa-solid fa-bag-shopping cyan-icon"></i> Smart Shopping Bag</h3>
+                    <p>Frictionless cart management. The UI dynamically recalculates subtotals and item counts in real-time as users increment, decrement, or remove products.</p>
+                </div>
+                <div class="showcase-image">
+                    <img src="img/you bag page.png" alt="Your Bag Page" class="glass-img">
+                </div>
+            </div>
+
+            <!-- 9. Checkout -->
+            <div class="showcase-row reveal-up">
+                <div class="showcase-content">
+                    <h3><i class="fa-solid fa-credit-card cyan-icon"></i> Secure Checkout Flow</h3>
+                    <p>A highly optimized, secure multi-step checkout process designed for maximum conversion. It securely handles user data and confirms payment details swiftly.</p>
+                </div>
+                <div class="showcase-image">
+                    <!-- Note: Ensure you have an image for checkout, or replace this src -->
+                    <img src="img/checkout.png" alt="Secure Checkout UI" class="glass-img">
+                </div>
+            </div>
+
+            <!-- 10. My Orders Page -->
+            <div class="showcase-row reverse reveal-up">
+                <div class="showcase-content">
+                    <h3><i class="fa-solid fa-box-open cyan-icon"></i> User Order Dashboard</h3>
+                    <p>A comprehensive tracking dashboard where authenticated users can monitor live order status, review purchase history, and verify delivery dates.</p>
+                    
+                    <a href="https://cack-shop-9fa21.web.app" target="_blank" class="btn btn-primary showcase-btn" style="margin-top: 1rem;">
+                        Visit Cake Shop Live <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                </div>
+                <div class="showcase-image">
+                    <img src="img/my order page.png" alt="My Orders Dashboard" class="glass-img">
+                </div>
+            </div>
+
+            <!-- 11. Voice Assistant -->
+            <div class="showcase-row reveal-up">
+                <div class="showcase-content">
+                    <h3><i class="fa-solid fa-microphone-lines cyan-icon pulse-mic"></i> Voice Assistant Helper</h3>
+                    <p>Next-generation accessibility. An integrated conversational AI allows users to search the menu, add items to their bag, and navigate the entire store hands-free.</p>
+                    <ul class="feature-list">
+                        <li><i class="fa-solid fa-comment-dots"></i> <strong>"Show me the Black Forest Cake."</strong></li>
+                        <li><i class="fa-solid fa-comment-dots"></i> Complex natural language processing</li>
+                    </ul>
+                </div>
+                <div class="showcase-image">
+                    <img src="img/voice-assistant.png" alt="Voice Assistant UI" class="glass-img">
+                </div>
+            </div>
+
+        </div>
+    </section>
+
     <section class="contact-section" id="contact">
         <div class="contact-header reveal-up">
             <span class="section-badge">CONTACT ENGINEERING</span>
@@ -427,14 +605,24 @@
                             <input type="email" id="contactEmail" placeholder="Enter your email address">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Company Name</label>
-                        <input type="text" id="contactCompany" placeholder="Quantum Dynamics Inc.">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Company/Shop Name</label>
+                            <input type="text" id="contactCompany" placeholder="Quantum Dynamics Inc.">
+                        </div>
                     </div>
+                    <div class="form-group">
+                            <label>Mobile No.</label>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <!-- Added maxlength="10" and updated placeholder -->
+                                <input type="tel" id="contactPhone" maxlength="10" placeholder="Enter your whatsApp/phone number" style="padding-right: 2.5rem;">
+                                <i class="fa-solid fa-circle-check" id="phone-check-icon" style="position: absolute; right: 15px; color: #10b981; opacity: 0; transition: opacity 0.3s ease; font-size: 1.1rem; z-index: 2;"></i>
+                            </div>
+                        </div>
                     <div class="form-group">
                         <label>Project Details</label>
                         <textarea id="contactMessage" rows="5"
-                            placeholder="Tell us about your technical requirements and objectives..."></textarea>
+                            placeholder="Tell us about your website requirements and objectives..."></textarea>
                     </div>
                     <button type="button" id="contactBtn" class="btn btn-submit">Send Inquiry <i
                             class="fa-solid fa-share"></i></button>
@@ -471,7 +659,13 @@
                     </div>
                     <div class="access-item">
                         <i class="fa-brands fa-instagram"></i>
-                        <a href="https://www.instagram.com/p/DZuc3k9mMCr/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="><span>@StackCraft_Technology</span></a>
+                        <a
+                            href="https://www.instagram.com/p/DZuc3k9mMCr/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="><span>@StackCraft_Technology</span></a>
+                    </div>
+                    <div class="access-item">
+                        <i class="fa-brands fab fa-whatsapp"></i>
+                        <a href="https://wa.me/917397534337"
+                            target="_blank"><span>StackCraft_webdevelop_service</span></a>
                     </div>
                 </div>
 
@@ -491,8 +685,7 @@
     <footer>
         <div class="footer-content">
             <div class="footer-brand">
-                <h4><img src="img/office logo.jpeg" alt=""
-                        style="width: 40px; border: 1px solid #1b2457; border-radius:4px;">
+                <h4><img src="img/sc.png" alt="" style="width: 40px; border: 1px solid #1b2457; border-radius:4px;">
                     stackcraft_technology</h4>
                 <p>Elite laboratory for technical innovation. Building future-proof digital infrastructure.</p>
                 <p class="copyright">&copy; 2026 stackcraft_technology. All rights reserved.</p>
@@ -593,8 +786,46 @@
         </div>
     </div>
 
+    <!-- Native UI Animation & Preloader Script (Failsafe) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // 1. SKELETON PRELOADER REMOVAL (Guaranteed to fire)
+            const preloader = document.getElementById("skeleton-preloader");
+            if (preloader) {
+                setTimeout(() => {
+                    preloader.classList.add("loaded");
+                    setTimeout(() => { preloader.remove(); }, 800);
+                }, 600);
+            }
+
+            // 2. REVEAL ANIMATIONS
+            const reveals = document.querySelectorAll(".reveal-up");
+            const observerOptions = {
+                root: null,
+                rootMargin: "0px",
+                threshold: 0.15
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("active");
+                    } else {
+                        entry.target.classList.remove("active");
+                    }
+                });
+            }, observerOptions);
+
+            reveals.forEach(reveal => {
+                observer.observe(reveal);
+            });
+        });
+    </script>
+
+    <!-- External & Module Scripts -->
     <script src="toast.js"></script>
-    <script src="index.js"></script>
+    <script type="module" src="index.js"></script>
     <script type="module" src="firebase-contact.js"></script>
 </body>
 

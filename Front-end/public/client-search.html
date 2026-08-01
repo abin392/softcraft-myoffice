@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StackCraft | Client Search</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="fontawesome-free-7.0.0-web/css/all.min.css">
+
+    <style>
+        /* Existing Client Search Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            background: #ebf5fb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: #fff;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .wa-btn {
+            display: inline-block;
+            background-color: #25D366;
+            color: #fff;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .wa-btn:hover {
+            background-color: #128C7E;
+        }
+
+        .disabled-btn {
+            background-color: #bdc3c7;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            display: inline-block;
+            cursor: not-allowed;
+        }
+
+        .rating {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .address-col {
+            max-width: 300px;
+        }
+
+        /* NEW: Security & UI Enhancements */
+        #auth-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80vh;
+        }
+
+        #secure-content {
+            display: none;
+        }
+
+        /* Hidden by default for security */
+        .back-nav {
+            margin-bottom: 20px;
+        }
+
+        .back-nav a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-nav a:hover {
+            color: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Security Loader -->
+    <div id="auth-loader">
+        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 3rem; color: #3498db; margin-bottom: 1rem;"></i>
+        <h3 style="color: #2c3e50;">Verifying Admin Access...</h3>
+    </div>
+
+    <!-- Main Content (Hidden until authenticated) -->
+    <div id="secure-content">
+        <div class="container">
+            <div class="back-nav">
+                <a href="admin.html"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
+            </div>
+
+            <h1>Bakery Client Leads</h1>
+
+            <div class="upload-section">
+                <h3>Have a new list? Upload your JSON file here</h3>
+                <input type="file" id="jsonInput" accept=".json">
+            </div>
+
+            <table id="clientsTable">
+                <thead>
+                    <tr>
+                        <th>Bakery Name</th>
+                        <th>Category</th>
+                        <th class="address-col">Location</th>
+                        <th>Rating</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will populate here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 1. Firebase Auth Logic (Must run first) -->
+    <script type="module" src="client-search.js"></script>
+
+    <!-- 2. Your Existing Data & Logic -->
+    <script>
+        // --- DYNAMIC MESSAGE GENERATOR (BUG FIX APPLIED) ---
+        function getDynamicMessage(fileName) {
+            // FIX: Safely convert to string to prevent null errors that break the table
+            const safeName = String(fileName || "").toLowerCase();
+            
+            let industryEn = "bakery and cake shop";
+            let industryTa = "பேக்கரி மற்றும் கேக் கடைகளுக்காக";
+            
+            // Intelligent topic detection based on JSON filename
+            if (safeName.includes("gym") || safeName.includes("fitness")) {
+                industryEn = "gym and fitness center";
+                industryTa = "ஜிம் மற்றும் ஃபிட்னஸ் மையங்களுக்கு";
+            } else if (safeName.includes("hotel") || safeName.includes("restaurant")) {
+                industryEn = "restaurant and food business";
+                industryTa = "உணவகங்கள் மற்றும் ஹோட்டல்களுக்கு";
+            } else if (safeName.includes("cake") || safeName.includes("bakery")) {
+                industryEn = "bakery and cake shop";
+                industryTa = "பேக்கரி மற்றும் கேக் கடைகளுக்காக";
+            }
+
+            const customRawMessage = `Hello! I noticed your ${industryEn} business. We specialize in building professional, high-quality websites for ${industryEn}s to help grow your online presence. Let me know if you are interested in getting a website for your shop!
+
+வணக்கம்! நாங்கள் ${industryTa} பிரத்யேகமாக தொழில்முறை வலைத்தளங்களை (websites) உருவாக்கித் தருகிறோம். இணையத்தில் உங்கள் தொழிலை வளர்க்கவும், புதிய வாடிக்கையாளர்களைப் பெறவும் வலைத்தளம் தேவைப்பட்டால், தயவுசெய்து எங்களுக்குத் தெரிவிக்கவும்.
+
+Visit my website: https://stackcraft-technologies-7f3eb.web.app/`;
+
+            return encodeURIComponent(customRawMessage);
+        }
+
+
+        // Function to render the table rows dynamically (BUG FIX APPLIED)
+        function renderTable(data, sourceFileName = "") {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = ''; 
+            
+            // Fallback for data to ensure the loop doesn't crash if JSON structure differs
+            const safeData = Array.isArray(data) ? data : (data.results || data.items || []);
+
+            // Fetch persistent sent tracking map from localStorage safely
+            let sentStatusMap = JSON.parse(localStorage.getItem("sentStatusMap") || "{}");
+            
+            // Safely fetch the filename
+            const safeFileName = sourceFileName || localStorage.getItem("lastUploadedFileName") || "";
+            const currentMessage = getDynamicMessage(safeFileName);
+
+            safeData.forEach((client, index) => {
+                const tr = document.createElement('tr');
+
+                // 1. Bakery/Business Name
+                const tdName = document.createElement('td');
+                tdName.textContent = client.title || client.name || 'N/A';
+                tr.appendChild(tdName);
+
+                // 2. Category
+                const tdCat = document.createElement('td');
+                tdCat.textContent = client.categoryName || client.category || 'N/A';
+                tr.appendChild(tdCat);
+
+                // 3. Location (City + Address)
+                const tdCity = document.createElement('td');
+                tdCity.className = 'address-col';
+                tdCity.textContent = client.address || client.city || 'N/A';
+                tr.appendChild(tdCity);
+
+                // 4. Rating
+                const tdRating = document.createElement('td');
+                tdRating.innerHTML = client.totalScore ? `<span class="rating">★ ${client.totalScore}</span>` : 'N/A';
+                tr.appendChild(tdRating);
+
+                // 5. WhatsApp Action Button with Permanent State
+                const tdAction = document.createElement('td');
+                
+                // FIX: Force phone to String to prevent integer crash on .replace()
+                let rawPhone = client.phoneUnformatted || client.phone || client.phoneNumber || '';
+                let phoneStr = String(rawPhone); 
+                let phoneClean = phoneStr.replace(/\D/g, '');
+
+                if (phoneClean && phoneClean.length > 5) {
+                    const waLink = document.createElement('a');
+                    waLink.href = `https://wa.me/${phoneClean}?text=${currentMessage}`;
+                    waLink.className = 'wa-btn';
+                    waLink.target = '_blank';
+
+                    // Unique identifier key for this specific client row
+                    const clientKey = `${client.title}_${phoneClean}`;
+
+                    // Check if this client was already marked as sent in localStorage
+                    if (sentStatusMap[clientKey]) {
+                        waLink.innerHTML = '<i class="fa-solid fa-circle-check"></i> Sent';
+                        waLink.style.backgroundColor = '#10b981';
+                        waLink.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.4)';
+                    } else {
+                        waLink.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Send WhatsApp';
+                    }
+                    
+                    // Permanent click listener storage update
+                    waLink.addEventListener('click', function() {
+                        this.innerHTML = '<i class="fa-solid fa-circle-check"></i> Sent';
+                        this.style.backgroundColor = '#10b981';
+                        this.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.4)';
+                        
+                        // Save status permanently
+                        sentStatusMap[clientKey] = true;
+                        localStorage.setItem("sentStatusMap", JSON.stringify(sentStatusMap));
+                    });
+
+                    tdAction.appendChild(waLink);
+                } else {
+                    const noPhone = document.createElement('span');
+                    noPhone.className = 'disabled-btn';
+                    noPhone.innerHTML = '<i class="fa-solid fa-phone-slash"></i> No Phone';
+                    tdAction.appendChild(noPhone);
+                }
+                tr.appendChild(tdAction);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        const embeddedData = [
+            { "title": "Jashiha's Homemade Cakes", "categoryName": "Bakery", "address": "17-E, West Street, Adirampattinam", "totalScore": 4.9, "phoneUnformatted": "+917010425862" },
+            { "title": "Sri Jothi Bakery & Sweets", "categoryName": "Bakery", "address": "89QP+M8J, Adirampattinam", "totalScore": 4.8, "phoneUnformatted": "+917305195685" },
+            { "title": "KARAIKAL IYANGARS FOODS LIMITED", "categoryName": "Bakery", "address": "No: 23/10, Post Office Road", "totalScore": 4.7, "phoneUnformatted": "" }
+            // Note: The rest of your embedded JSON array is preserved perfectly here. Truncated for display, but paste your full array in your actual file.
+        ];
+
+        // --- PERSISTENT LOCAL STORAGE LOAD ---
+        const storedLeads = localStorage.getItem("savedClientLeads");
+        const savedFileName = localStorage.getItem("lastUploadedFileName") || "";
+        
+        if (storedLeads) {
+            try {
+                renderTable(JSON.parse(storedLeads), savedFileName);
+            } catch(e) {
+                console.error("Local storage parsing error, falling back to default.", e);
+                renderTable(embeddedData, "cake-shop");
+            }
+        } else {
+            renderTable(embeddedData, "cake-shop");
+        }
+
+        // Allow user to upload any new JSON list and dynamically change context
+        document.getElementById('jsonInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const fileName = file.name; // e.g., "gym-leads.json" or "cake-shop.json"
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const parsedData = JSON.parse(event.target.result);
+                    
+                    // Save data and filename to localStorage permanently
+                    localStorage.setItem("savedClientLeads", JSON.stringify(parsedData));
+                    localStorage.setItem("lastUploadedFileName", fileName);
+                    
+                    // Optional: Reset sent status map when a brand new file/niche is uploaded
+                    // localStorage.removeItem("sentStatusMap"); 
+
+                    // Render table with the new file's dynamic context
+                    renderTable(parsedData, fileName); 
+                    
+                } catch (err) {
+                    alert('Error parsing JSON file. Please ensure it is a valid Google Maps scrape format.');
+                }
+            };
+            reader.readAsText(file);
+            this.value = ''; 
+        });
+    </script>
+</body>
+
+</html>

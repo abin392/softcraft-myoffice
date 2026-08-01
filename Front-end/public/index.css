@@ -148,18 +148,62 @@ a {
 }
 
 .hero h1 {
-    font-size: 4rem;
+    /* Lowered the minimum from 2.2rem to 1.8rem for better mobile fit */
+    font-size: clamp(1.8rem, 5vw + 1rem, 4rem); 
     font-weight: 800;
-    line-height: 1.1;
+    line-height: 1.25; 
     margin-bottom: 1.5rem;
     letter-spacing: -1px;
+    
+    /* --- THE FIX: Forces long continuous words to wrap instead of overflowing --- */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
-.hero h1 span {
-    color: var(--accent-cyan);
-    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+/* --- PROFESSIONAL TEXT ANIMATIONS --- */
+
+/* 1. Continuous Gradient Shine for Subtitle */
+.hero h1 .animated-gradient-text {
+    background: linear-gradient(to right, var(--accent-cyan), var(--accent-blue), var(--accent-cyan), var(--accent-blue));
+    background-size: 300% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    animation: text-shine 6s linear infinite;
+}
+
+@keyframes text-shine {
+    0% { background-position: 0% center; }
+    100% { background-position: 300% center; }
+}
+
+/* 2. Self-Drawing SVG Swoosh for Main Title */
+.svg-title-wrapper {
+    position: relative;
+    display: inline-block;
+    z-index: 1;
+}
+
+.title-swoosh {
+    position: absolute;
+    bottom: -0.1em; /* Scales perfectly up and down with your clamp() typography */
+    left: 0;
+    width: 100%;
+    height: 0.35em;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.title-swoosh path {
+    stroke-dasharray: 550;
+    stroke-dashoffset: 550;
+    /* Waits 0.8s for your page to load, then fluidly draws the vector line */
+    animation: draw-swoosh 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation-delay: 0.8s; 
+}
+
+@keyframes draw-swoosh {
+    to { stroke-dashoffset: 0; }
 }
 
 .hero p {
@@ -809,15 +853,10 @@ footer {
     }
 
     .hero {
-        padding: 5rem 5% 3rem;
+        padding: 6.5rem 5% 3rem; /* Added slightly more top padding so it clears the sticky navbar */
     }
 
-    .hero h1 {
-        font-size: 2.2rem;
-        word-wrap: break-word;
-        line-height: 1.2;
-    }
-
+    /* We remove the hardcoded font sizes here because clamp() handles them perfectly now! */
     .hero p {
         font-size: 1rem;
         margin-bottom: 2rem;
@@ -833,18 +872,22 @@ footer {
         text-align: center;
     }
 
-    .hero-welcome-text {
-        font-size: 1.8rem;
+    /* Reduces the vertical travel distance of animations on mobile so they feel snappier */
+    .reveal-up {
+        transform: translateY(20px); 
     }
 }
 
 /* --- HERO WELCOME MESSAGE (LOGGED IN) --- */
 .hero-welcome-text {
-    font-size: 2.2rem;
+    /* Fluid scaling for the welcome text */
+    font-size: clamp(1.6rem, 4vw + 0.5rem, 2.2rem); 
     font-weight: 800;
     margin-bottom: 1.5rem;
     color: var(--text-main);
     letter-spacing: -0.5px;
+    line-height: 1.3;
+    word-break: break-word; /* Ensures very long names wrap elegantly */
     animation: glow-pulse 3s infinite alternate ease-in-out;
 }
 
@@ -1623,5 +1666,195 @@ footer {
 
     .custom-toast.show {
         transform: translateY(0);
+    }
+}
+
+/* --- ENHANCED AUTHENTICATION UI --- */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 2.8rem !important; /* Prevents typing over the eye icon */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+    z-index: 2;
+}
+
+.toggle-password:hover {
+    color: var(--text-main);
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.auth-divider span {
+    padding: 0 1rem;
+}
+
+.google-btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
+    background-color: #ffffff;
+    color: #000000;
+    border: none;
+    font-weight: 800;
+}
+
+.google-btn:hover {
+    background-color: #f1f5f9;
+    color: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+}
+
+/* --- USER PROFILE DROPDOWN --- */
+.nav-auth-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: calc(100% + 15px);
+    right: 0;
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 12px;
+    padding: 1rem;
+    width: 260px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    z-index: 1000;
+}
+
+/* Magic reveal on hover IF the user is logged in */
+.nav-auth-wrapper.is-logged-in:hover .user-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 1rem;
+}
+
+.profile-avatar {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #ffffff;
+    flex-shrink: 0;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-details {
+    overflow: hidden;
+}
+
+.profile-details h4 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-details p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-logout {
+    width: 100%;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 0.7rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dropdown-logout:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+/* --- MOBILE DROPDOWN ADJUSTMENTS --- */
+/* Allows JavaScript to trigger the dropdown on mobile tap */
+.nav-auth-wrapper.is-logged-in.active .user-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .user-dropdown { 
+        /* Pulls the box slightly inwards so it doesn't clip off small mobile screens */
+        right: -10px; 
+        width: 250px; 
     }
 }

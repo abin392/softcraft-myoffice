@@ -42,11 +42,17 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Password</label>
-                        <input type="password" id="pass1" placeholder="••••••••" required>
+                        <div class="password-wrapper">
+                            <input type="password" id="pass1" placeholder="••••••••" required>
+                            <i class="fa-solid fa-eye toggle-password" title="Show Password"></i>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Confirm Password</label>
-                        <input type="password" id="pass2" placeholder="••••••••" required>
+                        <div class="password-wrapper">
+                            <input type="password" id="pass2" placeholder="••••••••" required>
+                            <i class="fa-solid fa-eye toggle-password" title="Show Password"></i>
+                        </div>
                     </div>
                 </div>
 
@@ -62,12 +68,18 @@
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-primary sign-btn">Create Account <i
-                        class="fa-solid fa-user-plus"></i></button>
+                <button type="submit" class="btn btn-primary sign-btn">Create Account <i class="fa-solid fa-user-plus"></i></button>
+
+                <div class="auth-divider"><span>OR</span></div>
+                
+                <button type="button" class="btn btn-outline google-btn" id="googleSignBtn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" style="width: 18px;">
+                    Continue with Google
+                </button>
             </form>
 
             <div class="sign-footer">
-                <p>Already have an account? <a href="login.html">Sign In</a></p>
+                <p>Already have an account? <a href="login.html">Login</a></p>
             </div>
 
         </div>
@@ -134,9 +146,22 @@
         </div>
     </div>
 
+    <!-- Native UI Animation Script (Failsafe) -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const reveals = document.querySelectorAll(".reveal-up");
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) entry.target.classList.add("active");
+                });
+            });
+            reveals.forEach(reveal => observer.observe(reveal));
+        });
+    </script>
+
     <script src="toast.js"></script>
-    <script src="index.js"></script>
-    <script src="sign.js"></script>
+    <script type="module" src="index.js"></script>
+    <script type="module" src="sign.js"></script>
 </body>
 
 </html>

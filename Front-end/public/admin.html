@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stackcraft | Admin Dashboard</title>
+    <link rel="icon" type="image/jpeg" href="img/sc.png">
+    <!-- Reusing your exact existing styles -->
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="fontawesome-free-7.0.0-web/css/all.min.css">
+    
+    <style>
+        /* Admin-specific micro-adjustments that don't affect index.css */
+        .admin-header { margin-top: 3rem; text-align: center; }
+        .inquiry-card { position: relative; }
+        .timestamp-badge {
+            position: absolute; top: 1rem; right: 1rem;
+            background: rgba(56, 189, 248, 0.1); color: var(--accent-cyan);
+            padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.7rem; font-weight: 800;
+        }
+        .data-row { margin-bottom: 0.8rem; font-size: 0.9rem; }
+        .data-row i { width: 20px; color: var(--text-muted); }
+        .message-box {
+            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.05);
+            padding: 1rem; border-radius: 8px; margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);
+        }
+        #admin-loader {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh;
+        }
+        #admin-content { display: none; } /* Hidden until auth is verified */
+        /* Admin Action Buttons */
+        .admin-action-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: 6px; margin-left: 12px;
+            color: #fff; transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            text-decoration: none;
+        }
+        .call-btn { background: var(--accent-blue); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+        .call-btn:hover { background: var(--accent-hover); transform: translateY(-3px); }
+        .wa-btn { background: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+        .wa-btn:hover { background: #059669; transform: translateY(-3px); }
+        /* Admin CRM Features */
+        .contacted-badge {
+            position: absolute; top: 1rem; left: 1rem;
+            color: #10b981; font-size: 1.3rem; z-index: 2;
+            background: rgba(16, 185, 129, 0.1); border-radius: 50%;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+        .admin-notes-section {
+            margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .admin-note-input {
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-main); padding: 10px; border-radius: 6px; margin-bottom: 10px;
+            font-family: inherit; font-size: 0.9rem; resize: vertical; min-height: 70px;
+        }
+        .admin-note-input:focus { border-color: var(--accent-cyan); outline: none; }
+        .admin-note-display {
+            font-size: 0.9rem; color: var(--accent-cyan); white-space: pre-wrap;
+            background: rgba(56, 189, 248, 0.05); padding: 10px; border-radius: 6px; line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Admin Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <img src="img/sc.png" alt="Stackcraft Logo" class="nav-brand-img">
+            StackCraft_Admin <span class="tag-purple" style="margin-left: 10px; font-size: 0.6rem;">SECURE</span>
+        </div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <!-- NEW: Client Search Secure Link -->
+            <a href="client-search.html" class="btn btn-outline" style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-users-viewfinder"></i> Client Search
+            </a>
+            <button id="admin-logout-btn" class="btn btn-outline">
+                <i class="fa-solid fa-right-from-bracket"></i> Exit
+            </button>
+        </div>
+    </nav>
+
+    <!-- Professional Loader -->
+    <div id="admin-loader">
+        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--accent-cyan); margin-bottom: 1rem;"></i>
+        <h3 style="color: var(--text-main);">Authenticating Admin Protocol...</h3>
+        <p style="color: var(--text-muted);">Verifying cryptographic credentials</p>
+    </div>
+
+    <!-- Admin Data Dashboard -->
+    <section class="capabilities" id="admin-content">
+        <div class="showcase-header admin-header reveal-up active">
+            <span class="section-badge">COMMAND CENTER</span>
+            <h2>Client Inquiries</h2>
+            <p>Real-time telemetry of all incoming project requests.</p>
+        </div>
+
+        <!-- This grid will be populated dynamically by JavaScript -->
+        <div class="grid-container" id="inquiries-grid">
+            <!-- Data Cards injected here -->
+        </div>
+    </section>
+
+    <!-- Connect to Firebase & Logic -->
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
