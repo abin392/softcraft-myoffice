@@ -132,6 +132,29 @@
         .back-nav a:hover {
             color: #2980b9;
         }
+        /* --- NEW: Action Buttons for Client Search Table --- */
+        .action-cell-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .admin-action-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; border-radius: 6px; 
+            color: #fff; transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            text-decoration: none; border: none; cursor: pointer;
+        }
+
+        .call-btn { background: #2563EB; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+        .call-btn:hover { background: #1D4ED8; transform: translateY(-3px); }
+        
+        .sms-btn { background: #F59E0B; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
+        .sms-btn:hover { background: #D97706; transform: translateY(-3px); }
+        
+        .wa-btn { background: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+        .wa-btn:hover { background: #059669; transform: translateY(-3px); }
     </style>
 </head>
 
@@ -157,6 +180,24 @@
                 <input type="file" id="jsonInput" accept=".json">
             </div>
 
+            <!-- NEW: Rating Filter UI -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                <h3 style="margin: 0; color: #3498db; font-size: 1.1rem;"><i class="fa-solid fa-address-book"></i> Client Directory</h3>
+                
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="ratingFilter" style="font-weight: bold; color: #2c3e50; font-size: 0.9rem;">
+                        <i class="fa-solid fa-star" style="color: #f39c12;"></i> Filter Rating:
+                    </label>
+                    <select id="ratingFilter" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #bdc3c7; outline: none; cursor: pointer; font-family: inherit; font-weight: bold;">
+                        <option value="all">All Ratings</option>
+                        <option value="4.5">4.5 & Above</option>
+                        <option value="4.0">4.0 & Above</option>
+                        <option value="3.5">3.5 & Above</option>
+                        <option value="unrated">Unrated / No Rating</option>
+                    </select>
+                </div>
+            </div>
+
             <table id="clientsTable">
                 <thead>
                     <tr>
@@ -177,217 +218,238 @@
     <!-- 1. Firebase Auth Logic (Must run first) -->
     <script type="module" src="client-search.js"></script>
 
-    <!-- 2. Your Existing Data & Logic -->
-    <script>
-        // --- DYNAMIC MESSAGE GENERATOR (BUG FIX APPLIED) ---
-        // --- DYNAMIC MESSAGE GENERATOR (WITH EXTENDED SECTORS) ---
-        function getDynamicMessage(fileName) {
-            // Safely convert to string to prevent null errors that break the table
-            const safeName = String(fileName || "").toLowerCase();
+    <!-- 2. Your Existing Data & Logic (Upgraded with Secure Firestore Sync) -->
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // Global status map linked to Firestore
+        let sentStatusMap = {};
+        const trackingRef = doc(db, "admin_status", "contact_tracking");
+
+        // --- DYNAMIC MESSAGE GENERATOR (WITH ANTI-SPAM RANDOMIZATION) ---
+        function getDynamicMessage(clientName) {
+            const safeName = clientName && clientName !== 'N/A' ? clientName.trim() : "business";
+
+            // 1. Randomize English Greetings & Openings
+            const greetingsEn = ["Hello!", "Hi there!", "Greetings!", "Hi!"];
+            const openingsEn = [
+                `I noticed your business, ${safeName}.`,
+                `I came across ${safeName} online.`,
+                `We saw the great work you're doing at ${safeName}.`
+            ];
             
-            // Default fallback
-            let industryEn = "bakery and cake shop";
-            let industryTa = "பேக்கரி மற்றும் கேக் கடைகளுக்காக";
-            
-            // Intelligent topic detection based on JSON filename
-            if (safeName.includes("gym") || safeName.includes("fitness")) {
-                industryEn = "gym and fitness center";
-                industryTa = "ஜிம் மற்றும் ஃபிட்னஸ் மையங்களுக்கு";
-            } else if (safeName.includes("hotel") || safeName.includes("restaurant")) {
-                industryEn = "restaurant and food business";
-                industryTa = "உணவகங்கள் மற்றும் ஹோட்டல்களுக்கு";
-            } else if (safeName.includes("cake") || safeName.includes("bakery")) {
-                industryEn = "bakery and cake shop";
-                industryTa = "பேக்கரி மற்றும் கேக் கடைகளுக்காக";
-            } 
-            // --- NEW SECTORS ADDED BELOW ---
-            else if (safeName.includes("photo") || safeName.includes("studio")) {
-                industryEn = "photo studio and photography";
-                industryTa = "புகைப்பட ஸ்டுடியோக்களுக்காக";
-            } else if (safeName.includes("ecommerce") || safeName.includes("e-commerce")) {
-                industryEn = "e-commerce and online store";
-                industryTa = "இ-காமர்ஸ் மற்றும் ஆன்லைன் கடைகளுக்காக";
-            } else if (safeName.includes("education") || safeName.includes("institution") || safeName.includes("school") || safeName.includes("college")) {
-                industryEn = "educational institution";
-                industryTa = "கல்வி மற்றும் பயிற்சி நிறுவனங்களுக்காக";
-            } else if (safeName.includes("e-attanous")) {
-                industryEn = "e-attanous and digital";
-                industryTa = "இ-அட்டானஸ் (e-attanous) நிறுவனங்களுக்காக";
-            }
+            const randomGreetEn = greetingsEn[Math.floor(Math.random() * greetingsEn.length)];
+            const randomOpenEn = openingsEn[Math.floor(Math.random() * openingsEn.length)];
 
-            const customRawMessage = `Hello! I noticed your ${industryEn} business. We specialize in building professional, high-quality websites for ${industryEn}s to help grow your online presence. Let me know if you are interested in getting a website for your shop!
+            // 2. Randomize Tamil Greetings
+            const greetingsTa = ["வணக்கம்!", "நல்வரவு!", "அன்பான வணக்கம்!"];
+            const randomGreetTa = greetingsTa[Math.floor(Math.random() * greetingsTa.length)];
 
-வணக்கம்! நாங்கள் ${industryTa} பிரத்யேகமாக தொழில்முறை வலைத்தளங்களை (websites) உருவாக்கித் தருகிறோம். இணையத்தில் உங்கள் தொழிலை வளர்க்கவும், புதிய வாடிக்கையாளர்களைப் பெறவும் வலைத்தளம் தேவைப்பட்டால், தயவுசெய்து எங்களுக்குத் தெரிவிக்கவும்.
-
-Visit my website: https://stackcraft-technologies-7f3eb.web.app/`;
+            // 3. Assemble the uniquely generated message
+            const customRawMessage = `${randomGreetEn} ${randomOpenEn} We specialize in building professional, high-quality websites to help grow your online presence. Let me know if you are interested in getting a website for your shop!\n\n${randomGreetTa} உங்கள் ${safeName} தொழிலை இணையத்தில் (Online) வளர்க்கவும், புதிய வாடிக்கையாளர்களைப் பெறவும் நாங்கள் பிரத்யேகமாக தொழில்முறை வலைத்தளங்களை (websites) உருவாக்கித் தருகிறோம். வலைத்தளம் தேவைப்பட்டால், தயவுசெய்து எங்களுக்குத் தெரிவிக்கவும்.\n\nVisit my website: https://stackcraft-technologies-7f3eb.web.app/`;
 
             return encodeURIComponent(customRawMessage);
         }
 
-
-        // Function to render the table rows dynamically (BUG FIX APPLIED)
+        // --- RENDER TABLE WITH FIREBASE LOGIC & DYNAMIC NAMING ---
         function renderTable(data, sourceFileName = "") {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = ''; 
             
-            // Fallback for data to ensure the loop doesn't crash if JSON structure differs
             const safeData = Array.isArray(data) ? data : (data.results || data.items || []);
-
-            // Fetch persistent sent tracking map from localStorage safely
-            let sentStatusMap = JSON.parse(localStorage.getItem("sentStatusMap") || "{}");
-            
-            // Safely fetch the filename
-            const safeFileName = sourceFileName || localStorage.getItem("lastUploadedFileName") || "";
-            const currentMessage = getDynamicMessage(safeFileName);
 
             safeData.forEach((client, index) => {
                 const tr = document.createElement('tr');
-
-                // 1. Bakery/Business Name
-                const tdName = document.createElement('td');
-                tdName.textContent = client.title || client.name || 'N/A';
-                tr.appendChild(tdName);
-
-                // 2. Category
-                const tdCat = document.createElement('td');
-                tdCat.textContent = client.categoryName || client.category || 'N/A';
-                tr.appendChild(tdCat);
-
-                // 3. Location (City + Address)
-                const tdCity = document.createElement('td');
-                tdCity.className = 'address-col';
-                tdCity.textContent = client.address || client.city || 'N/A';
-                tr.appendChild(tdCity);
-
-                // 4. Rating
-                const tdRating = document.createElement('td');
-                tdRating.innerHTML = client.totalScore ? `<span class="rating">★ ${client.totalScore}</span>` : 'N/A';
-                tr.appendChild(tdRating);
-
-                // 5. WhatsApp Action Button with Permanent State
-                const tdAction = document.createElement('td');
                 
-                // FIX: Force phone to String to prevent integer crash on .replace()
+                // NEW: Add CSS class and data attribute for the Rating Filter
+                tr.className = 'client-row';
+                tr.setAttribute('data-rating', client.totalScore || 0);
+
+                // 1-4. Basic Client Info
+                const clientTitle = client.title || client.name || 'N/A';
+                const tdName = document.createElement('td'); tdName.textContent = clientTitle; tr.appendChild(tdName);
+                const tdCat = document.createElement('td'); tdCat.textContent = client.categoryName || client.category || 'N/A'; tr.appendChild(tdCat);
+                const tdCity = document.createElement('td'); tdCity.className = 'address-col'; tdCity.textContent = client.address || client.city || 'N/A'; tr.appendChild(tdCity);
+                const tdRating = document.createElement('td'); tdRating.innerHTML = client.totalScore ? `<span class="rating">★ ${client.totalScore}</span>` : 'N/A'; tr.appendChild(tdRating);
+
+                // ---> NEW: Generate message specifically using THIS client's exact name <---
+                const currentMessage = getDynamicMessage(clientTitle !== 'N/A' ? clientTitle : "");
+
+                // 5. Action Buttons (Call, SMS, WhatsApp) with Secure DB State
+                const tdAction = document.createElement('td');
                 let rawPhone = client.phoneUnformatted || client.phone || client.phoneNumber || '';
                 let phoneStr = String(rawPhone); 
                 let phoneClean = phoneStr.replace(/\D/g, '');
 
                 if (phoneClean && phoneClean.length > 5) {
-                    const waLink = document.createElement('a');
-                    waLink.href = `https://wa.me/${phoneClean}?text=${currentMessage}`;
-                    waLink.className = 'wa-btn';
-                    waLink.target = '_blank';
+                    if (phoneClean.length === 10) phoneClean = '91' + phoneClean; 
 
-                    // Unique identifier key for this specific client row
-                    const clientKey = `${client.title}_${phoneClean}`;
+                    const clientKey = `${client.title}_${phoneClean}`.replace(/[~*/\[\]\.]/g, '_');
+                    let isSent = sentStatusMap[clientKey] === true;
 
-                    // Check if this client was already marked as sent in localStorage
-                    if (sentStatusMap[clientKey]) {
-                        waLink.innerHTML = '<i class="fa-solid fa-circle-check"></i> Sent';
-                        waLink.style.backgroundColor = '#10b981';
-                        waLink.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.4)';
-                    } else {
-                        waLink.innerHTML = '<i class="fa-brands fa-whatsapp"></i> Send WhatsApp';
-                    }
+                    const setSentUI = (btn) => {
+                        btn.style.backgroundColor = '#10b981';
+                        btn.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.4)';
+                        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+                    };
+
+                    const activeStyle = isSent ? 'background-color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);' : '';
+                    const callIcon = isSent ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-phone"></i>';
+                    const smsIcon = isSent ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-solid fa-comment-sms"></i>';
+                    const waIcon = isSent ? '<i class="fa-solid fa-circle-check"></i>' : '<i class="fa-brands fa-whatsapp"></i>';
+
+                    tdAction.innerHTML = `
+                        <div class="action-cell-container">
+                            <a href="tel:+${phoneClean}" class="admin-action-btn call-btn track-btn" style="${activeStyle}" title="Call Client">${callIcon}</a>
+                            <a href="sms:+${phoneClean}?body=${currentMessage}" class="admin-action-btn sms-btn track-btn" style="${activeStyle}" title="Send SMS">${smsIcon}</a>
+                            <a href="https://wa.me/${phoneClean}?text=${currentMessage}" target="_blank" class="admin-action-btn wa-btn track-btn" style="${activeStyle}" title="Send WhatsApp">${waIcon}</a>
+                        </div>
+                    `;
                     
-                    // Permanent click listener storage update
-                    waLink.addEventListener('click', function() {
-                        this.innerHTML = '<i class="fa-solid fa-circle-check"></i> Sent';
-                        this.style.backgroundColor = '#10b981';
-                        this.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.4)';
-                        
-                        // Save status permanently
-                        sentStatusMap[clientKey] = true;
-                        localStorage.setItem("sentStatusMap", JSON.stringify(sentStatusMap));
+                    // EVENT LISTENER: Triggers on Call, SMS, or WhatsApp
+                    const actionBtns = tdAction.querySelectorAll('.track-btn');
+                    actionBtns.forEach(btn => {
+                        btn.addEventListener('click', async function() {
+                            
+                            // --- NEW: WHATSAPP ANTI-SPAM DAILY COUNTER ---
+                            if (this.classList.contains('wa-btn')) {
+                                let today = new Date().toDateString();
+                                let dailyCount = parseInt(localStorage.getItem(`waSentCount_${today}`) || "0");
+                                dailyCount++;
+                                localStorage.setItem(`waSentCount_${today}`, dailyCount);
+                                
+                                // Warn the admin when they reach 30 and 45 messages in a single day
+                                if (dailyCount === 30) {
+                                    alert(`⚠️ SAFETY WARNING: You have sent ${dailyCount} WhatsApp messages today.\n\nTo prevent WhatsApp from restricting your account, please take a 1 to 2 hour break before sending more.`);
+                                } else if (dailyCount === 45) {
+                                    alert(`🛑 CRITICAL WARNING: You have sent ${dailyCount} messages today!\n\nDo not send any more messages today. WhatsApp will ban your account if you send 50+ messages to unsaved numbers in a day.`);
+                                }
+                            }
+                            // ----------------------------------------------
+
+                            // 1. Visually update ALL 3 buttons for this client instantly
+                            actionBtns.forEach(b => setSentUI(b));
+                            
+                            // 2. Update local storage for immediate speed
+                            sentStatusMap[clientKey] = true;
+                            localStorage.setItem("sentStatusMap", JSON.stringify(sentStatusMap));
+                            
+                            // 3. SECURE SYNC: Save to Firestore for cross-device tracking
+                            try {
+                                await setDoc(trackingRef, { [clientKey]: true }, { merge: true });
+                            } catch (err) {
+                                console.error("Database sync error: ", err);
+                            }
+                        });
                     });
 
-                    tdAction.appendChild(waLink);
                 } else {
-                    const noPhone = document.createElement('span');
-                    noPhone.className = 'disabled-btn';
-                    noPhone.innerHTML = '<i class="fa-solid fa-phone-slash"></i> No Phone';
-                    tdAction.appendChild(noPhone);
+                    tdAction.innerHTML = `<span class="disabled-btn"><i class="fa-solid fa-phone-slash"></i> No Phone</span>`;
                 }
                 tr.appendChild(tdAction);
-
                 tbody.appendChild(tr);
             });
+
+            // Automatically re-apply filter when a new file is uploaded
+            if (typeof applyRatingFilter === 'function') applyRatingFilter();
         }
 
+        // KEEP YOUR EXISTING JSON ARRAY HERE
         const embeddedData = [
             { "title": "Jashiha's Homemade Cakes", "categoryName": "Bakery", "address": "17-E, West Street, Adirampattinam", "totalScore": 4.9, "phoneUnformatted": "+917010425862" },
             { "title": "Sri Jothi Bakery & Sweets", "categoryName": "Bakery", "address": "89QP+M8J, Adirampattinam", "totalScore": 4.8, "phoneUnformatted": "+917305195685" },
             { "title": "KARAIKAL IYANGARS FOODS LIMITED", "categoryName": "Bakery", "address": "No: 23/10, Post Office Road", "totalScore": 4.7, "phoneUnformatted": "" }
-            // Note: The rest of your embedded JSON array is preserved perfectly here. Truncated for display, but paste your full array in your actual file.
+            // Note: Paste the rest of your bakery data here...
         ];
 
-        // --- DYNAMIC PAGE TITLE GENERATOR ---
         function updatePageTitle(fileName) {
             const h1 = document.querySelector('h1');
-            if (!fileName) {
-                h1.textContent = "Bakery Client Leads";
-                return;
-            }
-            
-            // Remove the .json extension and replace dashes/underscores with spaces
+            if (!fileName) { h1.textContent = "Bakery Client Leads"; return; }
             let cleanName = fileName.replace('.json', '').replace(/[-_]/g, ' ');
-            
-            // Capitalize the first letter of each word (e.g., "cake shop" -> "Cake Shop")
             cleanName = cleanName.replace(/\b\w/g, char => char.toUpperCase());
-            
-            // Update the H1 text dynamically
             h1.textContent = cleanName + " Client Leads";
         }
 
-        // --- PERSISTENT LOCAL STORAGE LOAD ---
-        const storedLeads = localStorage.getItem("savedClientLeads");
-        const savedFileName = localStorage.getItem("lastUploadedFileName") || "";
-        
-        // NEW: Update the heading instantly on page load based on permanently saved file name
-        updatePageTitle(savedFileName);
-        
-        if (storedLeads) {
+        // --- CROSS-DEVICE DATABASE INITIALIZATION ---
+        async function initializeDashboard() {
+            // First, securely fetch the master state from Firestore
             try {
-                renderTable(JSON.parse(storedLeads), savedFileName);
-            } catch(e) {
-                console.error("Local storage parsing error, falling back to default.", e);
-                renderTable(embeddedData, "cake-shop");
-                updatePageTitle("cake-shop"); // Fallback title
+                const docSnap = await getDoc(trackingRef);
+                if (docSnap.exists()) {
+                    sentStatusMap = docSnap.data();
+                    localStorage.setItem("sentStatusMap", JSON.stringify(sentStatusMap)); 
+                }
+            } catch (error) {
+                console.warn("Could not fetch DB. Falling back to local device tracking.", error);
+                sentStatusMap = JSON.parse(localStorage.getItem("sentStatusMap") || "{}");
             }
-        } else {
-            renderTable(embeddedData, "cake-shop");
-            updatePageTitle("cake-shop"); // Fallback title
+
+            const storedLeads = localStorage.getItem("savedClientLeads");
+            const savedFileName = localStorage.getItem("lastUploadedFileName") || "";
+            updatePageTitle(savedFileName);
+            
+            if (storedLeads) {
+                try { renderTable(JSON.parse(storedLeads), savedFileName); } 
+                catch(e) { renderTable(embeddedData, "cake-shop"); updatePageTitle("cake-shop"); }
+            } else {
+                renderTable(embeddedData, "cake-shop");
+                updatePageTitle("cake-shop");
+            }
         }
 
-        // Allow user to upload any new JSON list and dynamically change context
+        // Boot up the secure application
+        initializeDashboard();
+        
+        // Handle New File Uploads
         document.getElementById('jsonInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
-            const fileName = file.name; // e.g., "gym-leads.json" or "cake-shop.json"
-
+            const fileName = file.name; 
             const reader = new FileReader();
             reader.onload = function(event) {
                 try {
                     const parsedData = JSON.parse(event.target.result);
-                    
-                    // Save data and filename to localStorage permanently
                     localStorage.setItem("savedClientLeads", JSON.stringify(parsedData));
                     localStorage.setItem("lastUploadedFileName", fileName);
-                    
-                    // NEW: Instantly update the heading on new file upload
                     updatePageTitle(fileName);
-
-                    // Render table with the new file's dynamic context
                     renderTable(parsedData, fileName); 
-                    
                 } catch (err) {
-                    alert('Error parsing JSON file. Please ensure it is a valid Google Maps scrape format.');
+                    alert('Error parsing JSON file. Please ensure it is a valid format.');
                 }
             };
             reader.readAsText(file);
             this.value = ''; 
         });
+
+        // --- NEW: RATING FILTER LOGIC ---
+        function applyRatingFilter() {
+            const filterDropdown = document.getElementById('ratingFilter');
+            if (!filterDropdown) return;
+            
+            const filterValue = filterDropdown.value;
+            const rows = document.querySelectorAll('.client-row');
+            
+            rows.forEach(row => {
+                const rating = parseFloat(row.getAttribute('data-rating'));
+                let show = true;
+                
+                if (filterValue !== 'all') {
+                    if (filterValue === 'unrated') {
+                        // Shows clients with a 0 rating or no rating data
+                        show = rating === 0 || isNaN(rating);
+                    } else {
+                        // Compares the client rating to the selected dropdown limit
+                        show = rating >= parseFloat(filterValue);
+                    }
+                }
+                
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        // Attach listener to trigger whenever the admin changes the dropdown
+        document.getElementById('ratingFilter')?.addEventListener('change', applyRatingFilter);
     </script>
 </body>
 
