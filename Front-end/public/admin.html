@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,100 +9,256 @@
     <!-- Reusing your exact existing styles -->
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="fontawesome-free-7.0.0-web/css/all.min.css">
-    
+
+    <!-- Google Analytics -->
+    <script type="text/javascript">
+        (function (c, l, a, r, i, t, y) {
+            c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
+            t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+            y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+        })(window, document, "clarity", "script", "xyogdyuwdr");
+    </script>
+
     <!-- NEW: jsPDF for Exporting Professional PDF Reports -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         /* Admin-specific micro-adjustments that don't affect index.css */
-        .admin-header { margin-top: 3rem; text-align: center; }
-        .inquiry-card { position: relative; }
+        .admin-header {
+            margin-top: 3rem;
+            text-align: center;
+        }
+
+        .inquiry-card {
+            position: relative;
+        }
+
         .timestamp-badge {
-            position: absolute; top: 1rem; right: 1rem;
-            background: rgba(56, 189, 248, 0.1); color: var(--accent-cyan);
-            padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.7rem; font-weight: 800;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-cyan);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 800;
         }
-        .data-row { margin-bottom: 0.8rem; font-size: 0.9rem; }
-        .data-row i { width: 20px; color: var(--text-muted); }
+
+        .data-row {
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .data-row i {
+            width: 20px;
+            color: var(--text-muted);
+        }
+
         .message-box {
-            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.05);
-            padding: 1rem; border-radius: 8px; margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
         }
+
         #admin-loader {
-            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 60vh;
         }
-        #admin-content { display: none; } /* Hidden until auth is verified */
+
+        #admin-content {
+            display: none;
+        }
+
+        /* Hidden until auth is verified */
         /* Admin Action Buttons */
         .admin-action-btn {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 32px; height: 32px; border-radius: 6px; margin-left: 12px;
-            color: #fff; transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            margin-left: 12px;
+            color: #fff;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
             text-decoration: none;
         }
-        .call-btn { background: var(--accent-blue); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
-        .call-btn:hover { background: var(--accent-hover); transform: translateY(-3px); }
-        .wa-btn { background: #10b981; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
-        .wa-btn:hover { background: #059669; transform: translateY(-3px); }
+
+        .call-btn {
+            background: var(--accent-blue);
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+        }
+
+        .call-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-3px);
+        }
+
+        .wa-btn {
+            background: #10b981;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+        }
+
+        .wa-btn:hover {
+            background: #059669;
+            transform: translateY(-3px);
+        }
+
         /* Admin CRM Features */
         .contacted-badge {
-            position: absolute; top: 1rem; left: 1rem;
-            color: #10b981; font-size: 1.3rem; z-index: 2;
-            background: rgba(16, 185, 129, 0.1); border-radius: 50%;
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            color: #10b981;
+            font-size: 1.3rem;
+            z-index: 2;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 50%;
             box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
         }
+
         .admin-notes-section {
-            margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
+
         .admin-note-input {
-            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-main); padding: 10px; border-radius: 6px; margin-bottom: 10px;
-            font-family: inherit; font-size: 0.9rem; resize: vertical; min-height: 70px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 70px;
         }
-        .admin-note-input:focus { border-color: var(--accent-cyan); outline: none; }
+
+        .admin-note-input:focus {
+            border-color: var(--accent-cyan);
+            outline: none;
+        }
+
         .admin-note-display {
-            font-size: 0.9rem; color: var(--accent-cyan); white-space: pre-wrap;
-            background: rgba(56, 189, 248, 0.05); padding: 10px; border-radius: 6px; line-height: 1.6;
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+            white-space: pre-wrap;
+            background: rgba(56, 189, 248, 0.05);
+            padding: 10px;
+            border-radius: 6px;
+            line-height: 1.6;
         }
 
         /* --- NEW: Admin Controls & Delete Button Styles --- */
         .admin-controls-container {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; gap: 15px; flex-wrap: wrap; background: rgba(0, 0, 0, 0.2);
-            padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .export-btn {
-            background-color: #e74c3c; color: #fff; border: none; padding: 10px 18px;
-            border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer;
-            display: flex; align-items: center; gap: 8px; transition: background 0.3s;
+            background-color: #e74c3c;
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
         }
-        
-        .export-btn:hover { background-color: #c0392b; transform: translateY(-2px); }
-        
-        .search-filter-group { display: flex; gap: 12px; flex: 1; justify-content: flex-end; }
-        .search-wrapper { position: relative; flex: 1; max-width: 350px; }
-        .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #7f8c8d; }
-        
+
+        .export-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .search-filter-group {
+            display: flex;
+            gap: 12px;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            max-width: 350px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+
         #adminSearch {
-            width: 100%; padding: 10px 10px 10px 35px; background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-main);
-            outline: none; font-family: inherit;
+            width: 100%;
+            padding: 10px 10px 10px 35px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: var(--text-main);
+            outline: none;
+            font-family: inherit;
         }
-        
-        #adminSearch:focus { border-color: var(--accent-cyan); }
-        
+
+        #adminSearch:focus {
+            border-color: var(--accent-cyan);
+        }
+
         .time-filter {
-            padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-main); border-radius: 6px; outline: none; cursor: pointer; font-family: inherit;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
         }
 
         .delete-btn {
-            background-color: transparent; color: #e74c3c; border: 1px solid #e74c3c;
-            padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;
-            font-weight: bold; transition: all 0.3s ease; float: right; margin-top: -5px;
+            background-color: transparent;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            float: right;
+            margin-top: -5px;
         }
 
-        .delete-btn:hover { background-color: #e74c3c; color: #fff; }
+        .delete-btn:hover {
+            background-color: #e74c3c;
+            color: #fff;
+        }
 
         /* --- NEW: Fix Top Nav Overflow on Mobile Devices --- */
         @media (max-width: 768px) {
@@ -112,19 +269,22 @@
                 gap: 15px;
                 text-align: center;
             }
+
             .navbar .logo {
                 width: 100%;
                 justify-content: center;
                 font-size: 1.1rem;
             }
+
             /* Centers the action buttons on the second row */
-            .navbar > div:last-child {
+            .navbar>div:last-child {
                 width: 100%;
                 justify-content: center;
             }
         }
     </style>
 </head>
+
 <body>
 
     <!-- Admin Navigation -->
@@ -135,10 +295,12 @@
         </div>
         <div style="display: flex; gap: 15px; align-items: center;">
             <!-- NEW: Client Search Secure Link -->
-            <a href="client-search.html" class="btn btn-outline" style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
+            <a href="client-search.html" class="btn btn-outline"
+                style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-users-viewfinder"></i> Client
             </a>
-            <a href="https://console.apify.com/actors/nwua9Gu5YrADL7ZDj" class="btn btn-outline" style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
+            <a href="https://console.apify.com/actors/nwua9Gu5YrADL7ZDj" class="btn btn-outline"
+                style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-cogs"></i> Apify
             </a>
             <button id="admin-logout-btn" class="btn btn-outline">
@@ -149,7 +311,8 @@
 
     <!-- Professional Loader -->
     <div id="admin-loader">
-        <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 3rem; color: var(--accent-cyan); margin-bottom: 1rem;"></i>
+        <i class="fa-solid fa-circle-notch fa-spin"
+            style="font-size: 3rem; color: var(--accent-cyan); margin-bottom: 1rem;"></i>
         <h3 style="color: var(--text-main);">Authenticating Admin Protocol...</h3>
         <p style="color: var(--text-muted);">Verifying cryptographic credentials</p>
     </div>
@@ -167,13 +330,13 @@
             <button id="exportPdfBtn" class="export-btn">
                 <i class="fa-solid fa-file-pdf"></i> Export to PDF
             </button>
-            
+
             <div class="search-filter-group">
                 <div class="search-wrapper">
                     <i class="fa-solid fa-search"></i>
                     <input type="text" id="adminSearch" placeholder="Search name, company, email...">
                 </div>
-                
+
                 <select id="timeFilter" class="time-filter">
                     <option value="all">All Time</option>
                     <option value="week">This Week</option>
@@ -192,4 +355,5 @@
     <!-- Connect to Firebase & Logic -->
     <script type="module" src="admin.js"></script>
 </body>
+
 </html>
